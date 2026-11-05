@@ -1,0 +1,58 @@
+Source: jank
+Section: devel
+Priority: optional
+Maintainer: Adam Kalisz <adam.kalisz@notnullmakers.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ clang-22,
+ cmake,
+ git,
+ libboost-dev,
+ libclang-22-dev,
+ libclang-common-22-dev,
+ libclang-cpp22-dev,
+ libffi-dev,
+ libstdc++-14-dev,
+ libxml2-dev,
+ libzstd-dev,
+ llvm-22-dev,
+ ninja-build,
+ pkgconf,
+ procps <!nocheck>,
+ zlib1g-dev,
+Standards-Version: 4.7.2
+Homepage: https://jank-lang.org/
+Rules-Requires-Root: no
+
+Package: jank
+Architecture: amd64
+Depends:
+ gcc,
+ libboost-dev,
+ libbz2-dev,
+ libstdc++-14-dev,
+ libxml2-dev,
+ libzstd-dev,
+ zlib1g-dev,
+ ${jank:Toolchain},
+ ${misc:Depends},
+ ${shlibs:Depends},
+Recommends:
+ libclang-cpp22-dev,
+ llvm-22-dev,
+Description: native Clojure dialect on LLVM with seamless C++ interop
+ jank is a general-purpose programming language which embraces the
+ interactive, functional, value-oriented nature of Clojure and the desire
+ for the native runtime and performance of C++. It compiles to native code
+ through LLVM, with a JIT for interactive development and ahead-of-time
+ compilation of programs, and can call into C++ directly.
+ .
+ jank is alpha quality software. This package is a snapshot of upstream's
+ main branch, built against Debian's clang-22. The installed compiler
+ refers to clang-22 at runtime for its JIT, so the package depends on the
+ same upstream clang-22 release it was built with and must be rebuilt when
+ trixie moves to a new clang-22 point release.
+ .
+ Ahead-of-time compilation with the dynamic runtime (jank compile --runtime
+ dynamic) links against libLLVM and libclang-cpp and needs the recommended
+ llvm-22-dev and libclang-cpp22-dev; the default static runtime does not.

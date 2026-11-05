@@ -1,0 +1,90 @@
+jank for Debian: source notes
+=============================
+
+Upstream has no versioned releases. The package is a snapshot of jank's main branch:
+version 0.1~git<YYYYMMDD>.<hash7>-<revision>, where 0.1 is the version upstream's build
+reports, the date is the commit date in UTC and the hash is the commit. There is no
+debian/watch file for that reason.
+
+The packaging repository holds only debian/ and tools/; the jank source comes from the
+orig tarball.
+
+
+Prerequisites on the build host
+-------------------------------
+
+git, curl, xz-utils, dpkg-dev (dpkg-parsechangelog), devscripts (dch) and rootless
+podman with access to docker.io. No build dependencies are installed on the host: the
+package builds inside containers.
+
+
+Taking a new snapshot
+---------------------
+
+1. Make the orig tarball for the new commit (40-hex or an unambiguous prefix):
+
+     tools/make-orig <commit> ~/build/orig
+
+   It clones jank with its git submodules (immer's nested pybind11 and
+   sinusoidal-sphinx-theme submodules are excluded: jank's build does not use them),
+   adds zstd and libdwarf-lite at the versions cpptrace pins, removes all git
+   metadata and writes jank_<version>.orig.tar.xz. The same commit always gives the
+   same tarball. compiler+runtime/third-party/debian-vendor/SOURCES inside it lists
+   every component with its URL and commit or SHA-256.
+
+   If upstream's cpptrace moved its zstd or libdwarf-lite pins, make-orig stops:
+   update the table at the top of tools/make-orig (URL, SHA-256, commit) after
+   checking the new versions, and debian/copyright if their licences changed.
+
+2. Add a debian/changelog entry with the new version (dch -v
+   0.1~git<YYYYMMDD>.<hash7>-1) and update the version and date in the first
+   line of debian/jank.1. Check that debian/patches still applies:
+   - 0001 (Clang 23-only diagnostics in CppInterOp): drop it once upstream guards
+     those diagnostics with CLANG_VERSION_MAJOR itself;
+   - 0002 (main executable path in CppInterOp): drop it once upstream's
+     GetExecutablePath() no longer uses the dladdr() file name.
+
+3. Build and test:
+
+     tools/build ~/build/orig/jank_<version>.orig.tar.xz
+
+   The build runs in a throwaway podman container from docker.io/library/debian:trixie
+   with the apt suites trixie, trixie-updates and trixie-security (never backports),
+   without network access; lintian runs at the end. Results (source package, binary
+   packages, build.log) land in ~/build/jank-deb/<version>, or in the work directory
+   given as the second argument; that directory must not exist yet. The packaging
+   comes from the committed HEAD (uncommitted changes are not built), the build image
+   is made without cache each time, and a lintian error or warning that is not
+   overridden fails the build.
+
+The built jank reports an empty upstream git hash: upstream's build reads it with
+`git rev-parse HEAD`, and the orig tarball has no git metadata. The commit is in the
+version and in debian-vendor/SOURCES.
+
+
+When a rebuild is needed
+------------------------
+
+jank bakes the path of clang++-22 and clang-22's resource directory into its binary
+and uses them at runtime for its JIT. The binary package therefore depends on the
+same upstream clang-22 release it was built with:
+
+  clang-22 (>= 1:22.1.8~), clang-22 (<< 1:22.1.9~), and the same for
+  libclang-common-22-dev (computed by debian/toolchain-info at build time).
+
+Consequences:
+
+- When trixie moves to a new clang-22 upstream point release (e.g. 22.1.9), the
+  installed jank keeps the old clang-22 back, and a new installation cannot
+  proceed alongside the new clang-22, until jank is rebuilt against it. Rebuild
+  with a new Debian revision (-2, -3, ...) and the same orig tarball.
+- A Debian-only revision of the same upstream clang-22 (e.g. 1:22.1.8-1~deb13u5)
+  stays within the range and needs no rebuild. jank builds its precompiled header
+  with -fno-validate-pch, so if such a revision changed clang's resource headers,
+  jank would not notice; rebuild jank as well when that happens.
+- A change of libstdc++-14 or gcc-14 in trixie may need a rebuild too; the smoke
+  tests (debian/tests/smoke) show it.
+
+The build must run with a UTF-8 locale: jank's lexer decodes UTF-8 according to the
+locale and jank's own sources contain non-ASCII characters. debian/rules sets
+LC_ALL=C.UTF-8.

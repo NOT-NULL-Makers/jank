@@ -1,0 +1,14 @@
+jank (0.1~git20261101.f3d82d6-1) trixie; urgency=medium
+
+  * Initial package: upstream snapshot f3d82d65499920f81216e9235bd5d3a34a968e3f
+    (2026-11-01), built against Debian's clang-22.
+  * debian/patches/0001: guard Clang 23-only diagnostics in CppInterOp so that
+    jank builds with Clang 22.
+  * debian/patches/0002: take the main executable's path from the system in
+    CppInterOp; fixes a crash when jank is started by name from a directory
+    containing an entry named "jank".
+  * Pass Debian's LLVM library directory to the linker flags jank bakes in, so
+    that `jank compile --runtime dynamic` links; recommend llvm-22-dev and
+    libclang-cpp22-dev.
+
+ -- Adam Kalisz <adam.kalisz@notnullmakers.com>  Thu, 05 Nov 2026 06:45:00 +0100

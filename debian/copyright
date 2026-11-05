@@ -1,0 +1,445 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: jank
+Upstream-Contact: Jeaye Wilkerson <jeaye@jank-lang.org>
+Source: https://github.com/jank-lang/jank
+Comment:
+ The orig tarball is made by tools/make-orig in the packaging repository: jank at
+ one commit with its git submodules (immer's nested, unused submodules excluded),
+ plus zstd and libdwarf-lite, which cpptrace would otherwise download at configure
+ time. compiler+runtime/third-party/debian-vendor/SOURCES lists the URL and commit
+ or SHA-256 of every component.
+ .
+ libdwarf-lite (LGPL-2.1) and zstd (used under BSD-3-Clause) are linked statically
+ into /usr/bin/jank. The corresponding source is this source package, distributed
+ alongside the binary package.
+ .
+ Where a component's licence file names no copyright holder, the stanza names the
+ component's contributors.
+
+Files: *
+Copyright: jank contributors, Jeaye Wilkerson
+License: MPL-2.0
+
+Files:
+ compiler+runtime/src/jank/clojure/core.jank
+ compiler+runtime/src/jank/clojure/data.jank
+ compiler+runtime/src/jank/clojure/set.jank
+ compiler+runtime/src/jank/clojure/template.jank
+ compiler+runtime/src/jank/clojure/test.jank
+ compiler+runtime/src/jank/jank/shell.jank
+Copyright: Rich Hickey
+License: EPL-1.0
+Comment: Ports of Clojure's own namespaces, carrying Clojure's licence notice.
+
+Files: book/theme/highlight.js
+Copyright: 2006-2025 Josh Goebel and other contributors
+License: BSD-3-Clause
+Comment: Part of the book's web theme; not built or installed.
+
+Files: book/asset/mermaid.min.js
+Copyright: 2014-2022 Knut Sveidqvist
+License: MIT
+Comment: Part of the book's web assets; not built or installed.
+
+Files: compiler+runtime/third-party/bdwgc/*
+Copyright:
+ 1988-1989 Hans-J. Boehm, Alan J. Demers
+ 1991-1996 Xerox Corporation
+ 1996-1999 Silicon Graphics
+ 1998 Fergus Henderson
+ 1999-2001 Red Hat, Inc.
+ 1999-2011 Hewlett-Packard Development Company, L.P.
+ 2004-2005 Andrei Polushin
+ 2007 Free Software Foundation, Inc.
+ 2008-2025 Ivan Maidanski
+ 2011 Ludovic Courtes
+License: bdwgc
+
+Files:
+ compiler+runtime/third-party/boost-multiprecision/*
+ compiler+runtime/third-party/boost-preprocessor/*
+ compiler+runtime/third-party/boost-process/*
+Copyright:
+ Boost contributors, including John Maddock, Paul A. Bristow, Christopher
+ Kormanyos, Matt Borland, Peter Dimov, Paul Mensonides, Julio M. Merino Vidal and
+ Klemens D. Morgenstern
+License: BSL-1.0
+
+Files: compiler+runtime/third-party/cppinterop/*
+Copyright: The CppInterOp Project contributors
+License: Apache-2.0 with LLVM exception
+
+Files: compiler+runtime/third-party/cpptrace/*
+Copyright: 2023-2025 Jeremy Rifkin
+License: MIT
+
+Files: compiler+runtime/third-party/doctest/*
+Copyright: 2016-2023 Viktor Kirilov
+License: MIT
+
+Files: compiler+runtime/third-party/folly/*
+Copyright: Meta Platforms, Inc. and affiliates
+License: Apache-2.0
+Comment: build/fbcode_builder/CMake/FindLMDB.cmake and FindRe2.cmake carry a GPL-2
+ notice; they are CMake find-modules of folly's own build, which jank's build does
+ not use, and nothing derived from them is installed.
+
+Files: compiler+runtime/third-party/folly/folly/hash/detail/Crc32cDetail.cpp
+Copyright: 2016 Ferry Toth, Exalon Delft BV, The Netherlands
+License: Zlib
+Comment: Not part of jank's build.
+
+Files: compiler+runtime/third-party/folly/shim/third-party/googletest/gtest_main.cpp
+Copyright: 2006 Google Inc.
+License: BSD-3-Clause
+Comment: Not part of jank's build.
+
+Files: compiler+runtime/third-party/immer/*
+Copyright: 2016-2025 Juan Pedro Bolivar Puente
+License: BSL-1.0
+
+Files: compiler+runtime/third-party/immer/extra/js/lib/immutable.min.js
+Copyright: 2014-2015 Facebook, Inc.
+License: BSD-3-Clause
+Comment: Facebook's BSD-style licence with an additional patent grant, as stated in the
+ file. Benchmark material of immer; not built or installed.
+
+Files: compiler+runtime/third-party/immer/extra/js/lib/lodash.js
+Copyright: jQuery Foundation and other contributors; Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+License: MIT
+Comment: Benchmark material of immer; not built or installed.
+
+Files: compiler+runtime/third-party/immer/extra/js/lib/platform.js
+Copyright: 2014-2016 Benjamin Tan; John-David Dalton
+License: MIT
+Comment: Benchmark material of immer; not built or installed.
+
+Files: compiler+runtime/third-party/immer/extra/js/lib/benchmark.js
+Copyright: 2010-2016 Mathias Bynens; Robert Kieffer
+License: MIT
+Comment: Benchmark material of immer; not built or installed.
+
+Files: compiler+runtime/third-party/isocline/*
+Copyright: 2021 Daan Leijen
+License: MIT
+
+Files: compiler+runtime/third-party/json/*
+Copyright: 2013-2026 Niels Lohmann
+License: MIT
+Comment: LICENSES/ carries further licence texts referenced by the project's REUSE
+ metadata for individual auxiliary files; the library itself is MIT.
+
+Files: compiler+runtime/third-party/nanobench/*
+Copyright: 2019-2022 Martin Ankerl
+License: MIT
+
+Files: compiler+runtime/third-party/stduuid/*
+Copyright: stduuid contributors
+License: MIT
+
+Files: compiler+runtime/third-party/zip/*
+Copyright: zip contributors
+License: MIT
+
+Files: compiler+runtime/test/bash/clojure-test-suite/*
+Copyright: clojure-test-suite contributors
+License: MPL-2.0
+
+Files: compiler+runtime/third-party/debian-vendor/zstd/*
+Copyright: Meta Platforms, Inc. and affiliates
+License: BSD-3-Clause
+Comment: zstd is dual-licensed BSD-3-Clause or GPL-2; it is used here under
+ BSD-3-Clause.
+
+Files: compiler+runtime/third-party/debian-vendor/zstd/lib/dictBuilder/divsufsort.*
+Copyright: 2003-2008 Yuta Mori
+License: MIT
+Comment: Part of the static zstd library linked into /usr/bin/jank.
+
+Files: compiler+runtime/third-party/debian-vendor/zstd/tests/gzip/*
+Copyright: Free Software Foundation, Inc.
+License: GPL-3+
+Comment: gzip compatibility tests of zstd; not built.
+
+Files: compiler+runtime/third-party/debian-vendor/zstd/tests/gzip/Makefile
+Copyright: Meta Platforms, Inc. and affiliates
+License: BSD-3-Clause
+Comment: Under zstd's dual BSD-3-Clause / GPL-2 licence, used as BSD-3-Clause; not built.
+
+Files: compiler+runtime/third-party/debian-vendor/zstd/tests/gzip/test-driver.sh
+Copyright: Free Software Foundation, Inc.
+License: GPL-2+ with Autoconf exception
+Comment: Automake's test driver; not built.
+
+Files: compiler+runtime/third-party/debian-vendor/libdwarf-lite/*
+Copyright:
+ 2000-2004 Silicon Graphics, Inc.
+ 2007-2025 David Anderson
+License: LGPL-2.1
+
+Files:
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_debug_sup.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_debugaddr.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_debugaddr.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_debuglink.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_debuglink.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_elf_defines.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_elf_load_headers.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_elf_rel_detector.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_elf_rel_detector.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_elfread.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_elfread.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_elfstructs.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_fill_in_attr_form.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_form_class_names.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_gnu_index.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_gnu_index.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_loclists.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_machoread.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_machoread.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_object_detector.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_object_detector.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_object_read_common.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_object_read_common.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_pe_descr.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_peread.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_peread.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_reading.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_rnglists.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_rnglists.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_safe_arithmetic.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_safe_arithmetic.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_safe_strcpy.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_safe_strcpy.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_secname_ck.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_secname_ck.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_seekr.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_setup_sections.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_string.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_string.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_tsearch.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_tsearchhash.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_universal.h
+Copyright: 2013-2024 David Anderson
+License: BSD-2-Clause
+Comment: Part of libdwarf-lite, linked statically into /usr/bin/jank.
+
+Files:
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/Makefile.am
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dw-linetableheader.txt
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_local_malloc.c
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_local_malloc.h
+ compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/libdwarf_private.h
+Copyright: David Anderson
+License: public-domain
+ The files state that they are placed in the public domain.
+
+Files: compiler+runtime/third-party/debian-vendor/libdwarf-lite/src/lib/libdwarf/dwarf_macho_loader.h
+Copyright: 1999-2010 Apple Inc.
+License: APSL-2.0
+
+Files: debian/*
+Copyright: 2026 Adam Kalisz <adam.kalisz@notnullmakers.com>
+License: MPL-2.0
+
+License: MPL-2.0
+ This Source Code Form is subject to the terms of the Mozilla Public License,
+ v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain
+ one at https://mozilla.org/MPL/2.0/.
+ .
+ The full text of the Mozilla Public License 2.0 can be found in
+ /usr/share/common-licenses/MPL-2.0.
+
+License: Apache-2.0
+ Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+ this file except in compliance with the License. You may obtain a copy of the
+ License at http://www.apache.org/licenses/LICENSE-2.0
+ .
+ Unless required by applicable law or agreed to in writing, software distributed
+ under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ CONDITIONS OF ANY KIND, either express or implied.
+ .
+ The full text of the Apache License 2.0 can be found in
+ /usr/share/common-licenses/Apache-2.0.
+
+License: Apache-2.0 with LLVM exception
+ Licensed under the Apache License v2.0 with LLVM Exceptions; the Apache License
+ 2.0 text is in /usr/share/common-licenses/Apache-2.0. The exceptions:
+ .
+ As an exception, if, as a result of your compiling your source code, portions of
+ this Software are embedded into an Object form of such source code, you may
+ redistribute such embedded portions in such Object form without complying with
+ the conditions of Sections 4(a), 4(b) and 4(d) of the License.
+ .
+ In addition, if you combine or link compiled forms of this Software with
+ software that is licensed under the GPLv2 ("Combined Software") and if a court
+ of competent jurisdiction determines that the patent provision (Section 3), the
+ indemnity provision (Section 9) or other Section of the License conflicts with
+ the conditions of the GPLv2, you may retroactively and prospectively choose to
+ deem waived or otherwise exclude such Section(s) of the License, but only in
+ their entirety and only with respect to the Combined Software.
+
+License: BSL-1.0
+ Boost Software License - Version 1.0 - August 17th, 2003
+ .
+ Permission is hereby granted, free of charge, to any person or organization
+ obtaining a copy of the software and accompanying documentation covered by this
+ license (the "Software") to use, reproduce, display, distribute, execute, and
+ transmit the Software, and to prepare derivative works of the Software, and to
+ permit third-parties to whom the Software is furnished to do so, all subject to
+ the following:
+ .
+ The copyright notices in the Software and this entire statement, including the
+ above license grant, this restriction and the following disclaimer, must be
+ included in all copies of the Software, in whole or in part, and all derivative
+ works of the Software, unless such copies or derivative works are solely in the
+ form of machine-executable object code generated by a source language processor.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES
+ OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+ OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+License: MIT
+ Permission is hereby granted, free of charge, to any person obtaining a copy of
+ this software and associated documentation files (the "Software"), to deal in
+ the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ the Software, and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+License: BSD-3-Clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+ .
+ 1. Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+ 3. Neither the name of the copyright holder nor the names of its contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+License: LGPL-2.1
+ This library is free software; you can redistribute it and/or modify it under
+ the terms of version 2.1 of the GNU Lesser General Public License as published
+ by the Free Software Foundation.
+ .
+ The full text of the GNU Lesser General Public License version 2.1 can be found
+ in /usr/share/common-licenses/LGPL-2.1.
+
+License: EPL-1.0
+ The use and distribution terms for this software are covered by the Eclipse
+ Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php). By using
+ this software in any fashion, you are agreeing to be bound by the terms of this
+ license. You must not remove this notice, or any other, from this software.
+
+License: APSL-2.0
+ This file contains Original Code and/or Modifications of Original Code as
+ defined in and that are subject to the Apple Public Source License Version 2.0
+ (the 'License'). You may not use this file except in compliance with the
+ License. Please obtain a copy of the License at
+ https://opensource.apple.com/apsl/ and read it before using this file.
+
+License: bdwgc
+ THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED OR
+ IMPLIED. ANY USE IS AT YOUR OWN RISK.
+ .
+ Permission is hereby granted to use or copy this program for any purpose,
+ provided the above notices are retained on all copies. Permission to modify the
+ code and to distribute modified code is granted, provided the above notices are
+ retained, and a notice that the code was modified is included with the above
+ copyright notice.
+
+License: Zlib
+ This software is provided 'as-is', without any express or implied warranty. In no
+ event will the authors be held liable for any damages arising from the use of this
+ software.
+ .
+ Permission is granted to anyone to use this software for any purpose, including
+ commercial applications, and to alter it and redistribute it freely, subject to the
+ following restrictions:
+ .
+ 1. The origin of this software must not be misrepresented; you must not claim that
+    you wrote the original software. If you use this software in a product, an
+    acknowledgment in the product documentation would be appreciated but is not
+    required.
+ 2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+ 3. This notice may not be removed or altered from any source distribution.
+
+License: BSD-2-Clause
+ Redistribution and use in source and binary forms, with
+ or without modification, are permitted provided that the
+ following conditions are met:
+ .
+     Redistributions of source code must retain the above
+     copyright notice, this list of conditions and the following
+     disclaimer.
+ .
+     Redistributions in binary form must reproduce the above
+     copyright notice, this list of conditions and the following
+     disclaimer in the documentation and/or other materials
+     provided with the distribution.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ .
+ (Text as in libdwarf-lite's src/lib/libdwarf/dwarf_elfread.c.)
+
+License: GPL-2+ with Autoconf exception
+ This program is free software; you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation; either version 2, or (at your option) any later version.
+ .
+ As a special exception to the GNU General Public License, if you distribute this
+ file as part of a program that contains a configuration script generated by
+ Autoconf, you may include it under the same distribution terms that you use for
+ the rest of that program.
+ .
+ The full text of the GNU General Public License version 2 can be found in
+ /usr/share/common-licenses/GPL-2.
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later
+ version.
+ .
+ The full text of the GNU General Public License version 3 can be found in
+ /usr/share/common-licenses/GPL-3.

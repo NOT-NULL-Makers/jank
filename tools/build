@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# Build the jank Debian package from an orig tarball in throwaway podman containers.
+#
+# usage: tools/build <jank_VERSION.orig.tar.xz> [work-dir]
+#
+# 1. A build image is made from docker.io/library/debian:trixie with the apt suites
+#    trixie, trixie-updates and trixie-security and the package's Build-Depends; this is
+#    the only step with network access.
+# 2. The source package is built and then the binary package, in a container from that
+#    image, rootless, without network, as the invoking user, with only the work directory
+#    mounted. lintian runs at the end; an error or warning that is not overridden fails
+#    the build. The packaging is taken from the committed HEAD of this repository.
+# Results end up in <work-dir> (default ~/build/jank-deb/<version>).
+set -euo pipefail
+
+readonly BASE_IMAGE="docker.io/library/debian:trixie"
+
+die() { echo "build: $*" >&2; exit 1; }
+
+[[ $# -ge 1 && $# -le 2 ]] || die "usage: tools/build <orig-tarball> [work-dir]"
+orig="$(realpath "$1")"
+[[ -f "$orig" ]] || die "no such file: $orig"
+name="$(basename "$orig")"
+[[ "$name" =~ ^jank_(.+)\.orig\.tar\.xz$ ]] || die "not a jank orig tarball: $name"
+upstream_version="${BASH_REMATCH[1]}"
+
+repo="$(cd "$(dirname "$0")/.." && pwd)"
+# The version comes from the committed changelog, like the rest of the packaging.
+version="$(git -C "$repo" show HEAD:debian/changelog | dpkg-parsechangelog -l- -S Version)"
+[[ "${version%-*}" == "$upstream_version" ]] || die "debian/changelog is at $version, tarball is $upstream_version"
+
+work="$(realpath -m "${2:-$HOME/build/jank-deb/$version}")"
+[[ ! -e "$work" ]] || die "work directory exists, remove it first: $work"
+mkdir -p "$work"
+log="$work/build.log"
+exec > >(tee "$log") 2>&1
+
+echo "build: jank $version in $work"
+cp "$orig" "$work/"
+mkdir "$work/src"
+tar -xJf "$orig" -C "$work/src" --strip-components=1
+# The committed packaging, never the working tree (no stray or uncommitted files).
+commit="$(git -C "$repo" rev-parse HEAD)"
+echo "build: packaging commit $commit"
+if [[ -n "$(git -C "$repo" status --porcelain -- debian)" ]]; then
+  echo "build: warning: debian/ has uncommitted changes; they are NOT part of this build"
+fi
+git -C "$repo" archive "$commit" debian | tar -x -C "$work/src"
+
+# Build image: base image pulled by its fully qualified name, explicit apt suites,
+# Build-Depends from debian/control, no recommends.
+image_dir="$work/image"
+mkdir "$image_dir"
+git -C "$repo" show "$commit:debian/control" > "$image_dir/control"
+cat > "$image_dir/debian.sources" <<'EOF'
+Types: deb
+URIs: http://deb.debian.org/debian
+Suites: trixie trixie-updates
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+Types: deb
+URIs: http://deb.debian.org/debian-security
+Suites: trixie-security
+Components: main
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF
+cat > "$image_dir/Containerfile" <<EOF
+FROM $BASE_IMAGE
+RUN rm -f /etc/apt/sources.list /etc/apt/sources.list.d/*
+COPY debian.sources /etc/apt/sources.list.d/debian.sources
+COPY control /tmp/control
+RUN apt-get update \\
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \\
+      build-essential devscripts equivs lintian dpkg-dev \\
+ && mk-build-deps --install --remove \\
+      --tool 'apt-get -y --no-install-recommends -o Debug::pkgProblemResolver=yes' /tmp/control \\
+ && rm -rf /var/lib/apt/lists/* /tmp/control /jank-build-deps_*
+EOF
+tag="localhost/jank-deb-build:$(sha256sum "$image_dir/control" | cut -c1-12)"
+echo "build: pulling $BASE_IMAGE"
+podman pull -q "$BASE_IMAGE" > /dev/null
+echo "build: base image digest $(podman image inspect --format '{{.Digest}}' "$BASE_IMAGE")"
+echo "build: build image $tag"
+# --no-cache: the apt layer is installed afresh, so a stable update of clang-22 or another
+# build dependency is never missed because of a cached layer.
+podman build -q --no-cache -t "$tag" "$image_dir" > /dev/null
+
+# Build without network, rootless, as the invoking user, only the work directory mounted.
+podman run --rm --network=none --userns=keep-id --user "$(id -u):$(id -g)" \
+  --security-opt no-new-privileges \
+  -v "$work:/work:Z" -w /work/src -e HOME=/work/home -e DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS:-}" \
+  "$tag" bash -euo pipefail -c '
+    mkdir -p /work/home
+    echo "build: network interfaces: $(ls /sys/class/net | tr "\n" " ")"
+    echo "build: clang-22 $(dpkg-query -W -f "\${Version}" clang-22)"
+    dpkg-buildpackage -us -uc -sa
+    cd /work
+    lintian --info --display-info --pedantic --fail-on error,warning jank_*.changes
+  '
+
+echo "build: done; results in $work"
+ls -1 "$work"/*.deb "$work"/*.dsc "$work"/*.changes
+if grep -qE "Performing download step|Downloading https?://" "$log"; then
+  die "the build log shows a download step"
+fi
+echo "build: no download step in the build log"

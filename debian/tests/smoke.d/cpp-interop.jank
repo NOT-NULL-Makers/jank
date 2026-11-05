@@ -1,0 +1,6 @@
+(cpp/raw "#include <string>
+          size_t get_string_size(std::string const &s) { return s.size(); }")
+(let [s (cpp/std.string "jank on Debian")
+      n (cpp/get_string_size s)]
+  (println "size:" n))
+(println "to_string:" (cpp/std.to_string 42))

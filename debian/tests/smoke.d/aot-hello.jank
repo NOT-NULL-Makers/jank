@@ -1,0 +1,4 @@
+(ns hello.core)
+
+(defn -main [& args]
+  (println "aot hello" (+ 40 2)))

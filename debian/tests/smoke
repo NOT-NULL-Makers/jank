@@ -1,0 +1,99 @@
+#!/bin/sh
+# Smoke tests for jank: health check, evaluation, a hello-world program, C++ interop through
+# the JIT, a bare-name start, the REPL, and ahead-of-time compilation with both runtimes.
+# Used by debian/rules (dh_auto_test, on the built binary) and by autopkgtest (on the
+# installed /usr/bin/jank).
+#
+# JANK: the jank binary (default /usr/bin/jank). HOME must be writable: jank builds a PCH
+# into ~/.cache/jank on first use.
+set -eu
+
+JANK=${JANK:-/usr/bin/jank}
+here=$(cd "$(dirname "$0")" && pwd)
+if [ -n "${AUTOPKGTEST_TMP:-}" ]; then
+  export HOME="$AUTOPKGTEST_TMP"
+fi
+export LC_ALL="${LC_ALL:-C.UTF-8}"
+limit=900
+failed=0
+work=$(mktemp -d "$HOME/jank-smoke.XXXXXX")
+sessions="$work/sessions"
+: > "$sessions"
+
+# Run a command in a session of its own and remember the session, so that the leftover
+# check below only looks at processes these tests started.
+isolated() {
+  setsid -w sh -c 'echo $$ >> "$0"; exec "$@"' "$sessions" "$@"
+}
+
+check_output() {
+  name=$1 expected=$2; shift 2
+  actual=$(isolated "$@" 2>&1) || { echo "FAIL $name: exit status $?"; echo "$actual"; failed=1; return; }
+  if [ "$actual" = "$expected" ]; then
+    echo "ok   $name"
+  else
+    echo "FAIL $name: expected [$expected], got:"; echo "$actual"; failed=1
+  fi
+}
+
+echo "smoke: $JANK, HOME=$HOME, LC_ALL=$LC_ALL"
+
+if isolated timeout "$limit" "$JANK" check-health > "$work/check-health.log" 2>&1; then
+  echo "ok   check-health"
+else
+  echo "FAIL check-health"; cat "$work/check-health.log"; failed=1
+fi
+
+check_output arithmetic "3" timeout "$limit" "$JANK" run "$here/smoke.d/arithmetic.jank"
+check_output hello "Hello, world!" timeout "$limit" "$JANK" run "$here/smoke.d/hello.jank"
+check_output cpp-interop "size: 14
+to_string: 42" timeout "$limit" "$JANK" run "$here/smoke.d/cpp-interop.jank"
+
+# Started by bare name through PATH from a directory holding an entry named "jank" (a
+# directory, then a file): jank used to resolve argv[0] against the current directory and
+# crash (debian/patches/0002).
+mkdir -p "$work/bare-name-dir/jank" "$work/bare-name-file"
+: > "$work/bare-name-file/jank"
+for kind in dir file; do
+  check_output "bare-name-$kind" "3" sh -c 'cd "$1" && PATH="$2:$PATH" timeout "$3" jank run "$4"' \
+    sh "$work/bare-name-$kind" "$(dirname "$JANK")" "$limit" "$here/smoke.d/arithmetic.jank"
+done
+
+repl_out=$(printf '(+ 1 2)\n' | isolated timeout "$limit" "$JANK" repl 2>&1) || true
+if printf '%s\n' "$repl_out" | grep -qx '3'; then
+  echo "ok   repl"
+else
+  echo "FAIL repl:"; echo "$repl_out"; failed=1
+fi
+
+# Ahead-of-time compilation of a program with -main, with the default static runtime and
+# with the dynamic runtime (which links against libLLVM and libclang-cpp).
+mkdir -p "$work/aot/src/hello"
+cp "$here/smoke.d/aot-hello.jank" "$work/aot/src/hello/core.jank"
+for runtime in static dynamic; do
+  if isolated sh -c 'cd "$1" && timeout "$2" "$3" --module-path src --runtime "$4" \
+        --target-dir "target-$4" --name hello compile hello.core' \
+        sh "$work/aot" "$limit" "$JANK" "$runtime" > "$work/aot-$runtime.log" 2>&1; then
+    check_output "aot-$runtime" "aot hello 42" "$work/aot/target-$runtime/hello"
+  else
+    echo "FAIL aot-$runtime: compilation failed"; cat "$work/aot-$runtime.log"; failed=1
+  fi
+done
+
+# No process started by these tests may outlive them (the REPL starts an nREPL server).
+leftover=""
+while read -r sid; do
+  pids=$(pgrep -s "$sid" || true)
+  if [ -n "$pids" ]; then
+    leftover="$leftover $pids"
+    kill $pids 2>/dev/null || true
+  fi
+done < "$sessions"
+if [ -n "$leftover" ]; then
+  echo "FAIL leftover processes:$leftover"
+  failed=1
+fi
+
+rm -rf "$work"
+[ "$failed" -eq 0 ] && echo "smoke: all passed"
+exit "$failed"

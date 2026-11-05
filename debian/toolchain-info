@@ -1,0 +1,26 @@
+#!/bin/sh
+# Print the clang-22 toolchain this build uses; with --substvars, print the jank:Toolchain
+# substvar that keeps the installed jank on the same upstream clang-22 release.
+#
+# jank bakes the path of clang++-22 and its resource directory into the binary, so it must
+# run with the clang-22 upstream release it was built with: >= U~ and << N~, where U is the
+# upstream part of the build's clang-22 version (e.g. 1:22.1.8) and N the next point release.
+set -eu
+
+version=$(dpkg-query -W -f '${Version}' clang-22)
+common=$(dpkg-query -W -f '${Version}' libclang-common-22-dev)
+[ "$version" = "$common" ] || { echo "toolchain-info: clang-22 $version != libclang-common-22-dev $common" >&2; exit 1; }
+
+upstream=${version%-*}
+case "$upstream" in
+  *:*.*.*) ;;
+  *) echo "toolchain-info: unexpected clang-22 version $version" >&2; exit 1 ;;
+esac
+patch=${upstream##*.}
+next="${upstream%.*}.$((patch + 1))"
+
+if [ "${1:-}" = "--substvars" ]; then
+  echo "jank:Toolchain=clang-22 (>= ${upstream}~), clang-22 (<< ${next}~), libclang-common-22-dev (>= ${upstream}~), libclang-common-22-dev (<< ${next}~)"
+else
+  echo "toolchain-info: building with clang-22 $version, libclang-common-22-dev $common"
+fi

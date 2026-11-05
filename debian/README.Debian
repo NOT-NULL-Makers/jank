@@ -1,0 +1,51 @@
+jank for Debian
+===============
+
+This package is a snapshot of upstream's main branch (jank is alpha software),
+built against Debian's clang-22.
+
+Locale
+------
+
+jank decodes source files according to the locale. Run it in a UTF-8 locale
+(e.g. LANG=C.UTF-8) if your sources contain non-ASCII characters; in the C
+locale a string such as "café" fails with "Unterminated string".
+
+clang-22
+--------
+
+jank uses /usr/bin/clang++-22 and clang-22's resource directory at runtime for
+its JIT and for ahead-of-time compilation. The package depends on the same
+upstream clang-22 release it was built with and is rebuilt when trixie moves to
+a new clang-22 point release.
+
+On first use jank builds a precompiled header into ~/.cache/jank/.
+
+Ahead-of-time compilation
+-------------------------
+
+`jank compile` uses the static runtime by default, which needs nothing beyond
+this package's dependencies. `--runtime dynamic` links the program against
+libLLVM and libclang-cpp and needs llvm-22-dev and libclang-cpp22-dev (both
+recommended packages; they provide the unversioned libLLVM.so and libclang-cpp.so).
+
+gdb
+---
+
+Upstream's gdb helper for jank values is installed as
+/usr/share/jank/gdb/jank.py; load it in gdb with
+`source /usr/share/jank/gdb/jank.py`.
+
+Known issues
+------------
+
+- `jank print-cflags` and the include search of the JIT contain directories of
+  the build environment (/work/src/...), which do not exist on installed
+  systems. They come before the system include directories, so headers placed
+  there would take precedence in every JIT compilation and persist in the
+  precompiled header in ~/.cache/jank. This is harmless as long as /work is not
+  created by an untrusted party (on a normal system only root can create it).
+  It comes from upstream's build and is to be reported upstream.
+- Debian-specific patches: debian/patches/0001 lets jank build with Clang 22;
+  debian/patches/0002 fixes a crash when jank is started by name from a
+  directory containing an entry named "jank".

@@ -1,0 +1,94 @@
+.TH JANK 1 "2026-11-05" "jank 0.1~git20261101.f3d82d6" "User Commands"
+.SH NAME
+jank \- native Clojure dialect on LLVM with C++ interop
+.SH SYNOPSIS
+.B jank
+.I command
+.RI [ options ]
+.RI [ arguments ]
+.SH DESCRIPTION
+.B jank
+evaluates and compiles jank, Clojure and C++ sources. It provides a REPL and a JIT
+for interactive development and compiles programs ahead of time to native code.
+jank is alpha quality software.
+.PP
+Run
+.B jank help
+for the complete list of options of the installed version.
+.SH COMMANDS
+.TP
+.B run \fIfile\fR
+Load and run a file.
+.TP
+.B repl
+Start a terminal REPL client and an nREPL server.
+.TP
+.B cpp-repl
+Start a terminal C++ REPL client.
+.TP
+.B run-main \fImodule\fR
+Load a module and execute its \-main function.
+.TP
+.B compile-module \fImodule\fR
+Compile a module (given its namespace) and its dependencies ahead of time.
+.TP
+.B compile \fImodule\fR
+Compile a project ahead of time, with an entry point module containing \-main.
+.TP
+.B check-health
+Report on the state of the jank installation: its resource directory, the Clang it
+uses, and whether JIT and AOT compilation work.
+.TP
+.B print-binary-version
+Print the current binary version and exit.
+.TP
+.B print-cflags
+Print the Clang flags for AOT compilation of C++ source code and exit.
+.TP
+.B help
+Print the help message and exit.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Print the help message and exit.
+.TP
+.B \-\-module\-path \fIpath\fR
+A colon separated list of directories, JAR files and ZIP files to search for modules.
+.TP
+.BR \-p ", " \-\-port " \fIport\fR"
+The port the nREPL server binds to; 0 or omitted selects a random free port.
+.TP
+.BR \-O ", " \-\-optimization " \fI0\-3\fR"
+The optimization level for AOT compilation.
+.TP
+.B \-\-runtime \fIstatic\fR|\fIdynamic\fR
+The AOT runtime to target (default: static).
+.TP
+.B \-\-target\-dir \fIpath\fR
+The directory for final artifacts (default: target).
+.TP
+.BR \-I ", " \-\-include\-dir " \fIpath\fR"
+A directory for include resolution; may be given several times.
+.TP
+.BR \-D ", " \-\-define\-macro " \fIname\fR[=\fIvalue\fR]"
+Define a preprocessor macro; may be given several times.
+.TP
+.BR \-L ", " \-\-library\-dir " \fIpath\fR"
+A directory to search for libraries; may be given several times.
+.TP
+.B \-l\fIlib\fR
+Link a library; may be given several times.
+.SH FILES
+.TP
+.I /usr/lib/jank/0.1
+jank's resource directory: headers, runtime libraries and core library sources.
+.TP
+.I ~/.cache/jank
+Per-user cache, including the precompiled header jank builds on first use.
+.SH NOTES
+jank uses clang++\-22 at runtime for its JIT and for AOT compilation. Its sources are
+UTF\-8; run it in a UTF\-8 locale.
+.SH SEE ALSO
+.BR clang (1)
+.PP
+The jank book: https://book.jank-lang.org/

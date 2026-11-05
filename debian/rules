@@ -1,0 +1,65 @@
+#!/usr/bin/make -f
+
+# jank's lexer decodes UTF-8 according to the locale; its own sources contain non-ASCII
+# characters, so the build fails in the C locale.
+export LC_ALL = C.UTF-8
+
+# jank must be built with the same Clang it embeds for its JIT.
+export CC = clang-22
+export CXX = clang++-22
+
+# jank bakes CMAKE_SHARED_LINKER_FLAGS (from LDFLAGS) into the link flags it uses for
+# `jank compile --runtime dynamic`. Upstream's packages ship LLVM in jank's own library
+# directory; with Debian's LLVM the linker needs its directory to find -lLLVM and
+# -lclang-cpp (the latter from libclang-cpp22-dev).
+export DEB_LDFLAGS_MAINT_APPEND = -L/usr/lib/llvm-22/lib
+
+VENDOR := $(CURDIR)/compiler+runtime/third-party/debian-vendor
+# Upstream's build directory: the freshly built jank finds its own core library sources
+# relative to itself (../src/jank) while it compiles them during the build.
+BUILDDIR := $(CURDIR)/compiler+runtime/build
+
+%:
+	dh $@ --buildsystem=cmake+ninja --sourcedirectory=compiler+runtime --builddirectory=compiler+runtime/build
+
+# Release instead of debhelper's None: upstream's build type decides how jank's core
+# libraries are compiled during the build (-O3 for Release, -O0 otherwise), which is what
+# programs then run; it also adds -O2 -DNDEBUG to Debian's flags. DEB_BUILD_OPTIONS=noopt
+# therefore does not apply to those parts.
+#
+# cpptrace downloads zstd and libdwarf-lite at configure time; tools/make-orig puts the pinned
+# versions into debian-vendor/, and FetchContent is told to use them and never download.
+override_dh_auto_configure:
+	sh debian/toolchain-info
+	dh_auto_configure -- \
+	  -DCMAKE_BUILD_TYPE=Release \
+	  -DLLVM_DIR=/usr/lib/llvm-22/lib/cmake/llvm \
+	  -DClang_DIR=/usr/lib/llvm-22/lib/cmake/clang \
+	  -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+	  -DFETCHCONTENT_SOURCE_DIR_LIBDWARF=$(VENDOR)/libdwarf-lite \
+	  -DFETCHCONTENT_SOURCE_DIR_ZSTD=$(VENDOR)/zstd
+
+# The smoke tests need a writable HOME (jank builds a PCH into ~/.cache/jank); it lives in
+# the build directory, which dh_auto_clean removes even after a failed test.
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	rm -rf $(BUILDDIR)/test-home
+	mkdir -p $(BUILDDIR)/test-home
+	HOME=$(BUILDDIR)/test-home JANK=$(BUILDDIR)/jank sh debian/tests/smoke
+endif
+
+# jank looks up its .clang-format at <resource dir>/../../../share/.clang-format, i.e.
+# /usr/share/.clang-format, so that file stays. The gdb pretty-printer helper is not read by
+# jank; upstream installs it as /usr/share/gdb/jank.py, a name in gdb's own directory, so it
+# moves to a jank-owned path (see README.Debian for how to load it).
+execute_after_dh_auto_install:
+	mkdir -p debian/jank/usr/share/jank/gdb
+	mv debian/jank/usr/share/gdb/jank.py debian/jank/usr/share/jank/gdb/
+	rmdir debian/jank/usr/share/gdb
+
+execute_before_dh_gencontrol:
+	sh debian/toolchain-info --substvars >> debian/jank.substvars
+
+# dwz in trixie does not understand clang's DWARF 5 (.debug_addr); the debug symbols in
+# jank-dbgsym are simply not deduplicated.
+override_dh_dwz:

@@ -1,0 +1,30 @@
+Description: Take the main executable's path from the system in CppInterOp
+ CppInterOp's GetExecutablePath() used the dladdr() file name of a symbol in
+ the main executable. For the main executable that is argv[0] as typed, so
+ `jank` started through PATH from a directory containing any entry named
+ `jank` made initializeDyld() open that entry as an object file; cantFail()
+ then failed and jank crashed with SIGSEGV. Use
+ llvm::sys::fs::getMainExecutable(), which reads /proc/self/exe on Linux.
+Author: Adam Kalisz <adam.kalisz@notnullmakers.com>
+Forwarded: not-yet
+Last-Update: 2026-11-05
+---
+--- a/compiler+runtime/third-party/cppinterop/lib/CppInterOp/DynamicLibraryManagerSymbol.cpp	2026-11-01 18:51:11.000000000 +0000
++++ b/compiler+runtime/third-party/cppinterop/lib/CppInterOp/DynamicLibraryManagerSymbol.cpp	2026-11-05 13:15:48.836845120 +0000
+@@ -467,9 +467,13 @@
+ // address of main, and some platforms can't implement GetMainExecutable
+ // without being given the address of a function in the main executable).
+ std::string GetExecutablePath() {
+-  // This just needs to be some symbol in the binary; C++ doesn't
+-  // allow taking the address of ::main however.
+-  return DynamicLibraryManager::getSymbolLocation(&GetExecutablePath);
++  // getSymbolLocation() reports the dladdr() file name, which for the main
++  // executable is argv[0] as typed (e.g. "jank"). Resolved against the current
++  // directory, that can name an unrelated file, and opening it as an object
++  // file then fails in initializeDyld(). getMainExecutable() asks the system
++  // (/proc/self/exe on Linux); the function address is the fallback hint.
++  return llvm::sys::fs::getMainExecutable(
++      nullptr, reinterpret_cast<void*>(&GetExecutablePath));
+ }
+ 
+ class Dyld {

@@ -1,0 +1,29 @@
+Description: Guard Clang 23-only diagnostics in CppInterOp
+ The PCH staleness check names clang::diag::note_fe_ast_file_modified and
+ clang::diag::note_ast_file_input_files_validation_status, which exist only
+ from LLVM 23. The same function already guards the second use of
+ note_fe_ast_file_modified with CLANG_VERSION_MAJOR >= 23; guard the list the
+ same way so that jank builds with Clang 22, which its CMake code supports.
+Author: Adam Kalisz <adam.kalisz@notnullmakers.com>
+Forwarded: not-yet
+Last-Update: 2026-11-05
+---
+diff --git a/compiler+runtime/third-party/cppinterop/lib/CppInterOp/Compatibility.h b/compiler+runtime/third-party/cppinterop/lib/CppInterOp/Compatibility.h
+index afc5016..1fac282 100644
+--- a/compiler+runtime/third-party/cppinterop/lib/CppInterOp/Compatibility.h
++++ b/compiler+runtime/third-party/cppinterop/lib/CppInterOp/Compatibility.h
+@@ -230,10 +230,14 @@ public:
+                         const clang::Diagnostic &Info) override {
+     auto const IsPCHStalenessDiagnostic{
+       Info.getID() == clang::diag::err_fe_ast_file_modified
++#if CLANG_VERSION_MAJOR >= 23
+       || Info.getID() == clang::diag::note_fe_ast_file_modified
++#endif
+       || Info.getID() == clang::diag::note_ast_file_required_by
+       || Info.getID() == clang::diag::note_ast_file_rebuild_required
++#if CLANG_VERSION_MAJOR >= 23
+       || Info.getID() == clang::diag::note_ast_file_input_files_validation_status
++#endif
+     };
+     if (Info.getID() == clang::diag::err_fe_ast_file_modified
+ #if CLANG_VERSION_MAJOR >= 23

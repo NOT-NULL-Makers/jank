@@ -1,0 +1,9 @@
+# cpptrace links its own static zstd (CMake target libzstd_static, which jank names
+# directly); with Debian's libzstd the link fails. zstd 1.5.7 is vendored at cpptrace's
+# pin: see debian/copyright and debian/README.source.
+embedded-library libzstd [usr/bin/jank]
+# jank reads its clang-format configuration at runtime from
+# <resource dir>/../../../share/.clang-format, i.e. this path.
+file-directly-in-usr-share [usr/share/.clang-format]
+# Package for a private repository: there is no ITP bug to close.
+initial-upload-closes-no-bugs [usr/share/doc/jank/changelog.Debian.gz:1]

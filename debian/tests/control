@@ -1,0 +1,2 @@
+Tests: smoke
+Depends: @, libclang-cpp22-dev, llvm-22-dev, procps

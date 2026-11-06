@@ -6,8 +6,22 @@ version 0.1~git<YYYYMMDD>.<hash7>-<revision>, where 0.1 is the version upstream'
 reports, the date is the commit date in UTC and the hash is the commit. There is no
 debian/watch file for that reason.
 
-The packaging repository holds only debian/ and tools/; the jank source comes from the
-orig tarball.
+
+Repository layout
+-----------------
+
+This repository is a fork of https://github.com/jank-lang/jank laid out after DEP-14:
+
+- main mirrors upstream's main branch and is never committed to;
+- debian/latest is upstream merged in, plus debian/ and tools/.
+
+Only debian/ and tools/ belong to the packaging. The jank source of a package comes from
+the orig tarball, which tools/make-orig makes from upstream itself, never from this tree,
+so the tarball carries no packaging.
+
+Upstream's .gitignore ignores every path named "build". tools/build is tracked, so a
+change to it stages normally; only adding it again after removing it, or adding another
+file named build, needs `git add -f`.
 
 
 Prerequisites on the build host
@@ -20,6 +34,18 @@ package builds inside containers.
 
 Taking a new snapshot
 ---------------------
+
+0. Bring upstream into debian/latest by merging, never by rebasing (the branch is
+   public):
+
+     git remote add upstream https://github.com/jank-lang/jank.git   # once
+     git remote set-url --push upstream no-push                       # once
+     git fetch upstream
+     git switch main && git merge --ff-only upstream/main
+     git switch debian/latest && git merge main
+     git push origin main debian/latest
+
+   The new snapshot is the commit main now points at.
 
 1. Make the orig tarball for the new commit (40-hex or an unambiguous prefix):
 

@@ -77,7 +77,7 @@ Taking a new snapshot
    The build runs in a throwaway podman container from docker.io/library/debian:trixie
    with the apt suites trixie, trixie-updates and trixie-security (never backports),
    without network access; lintian runs at the end. Results (source package, binary
-   packages, build.log) land in ~/build/jank-deb/<version>, or in the work directory
+   packages, build.log) land in ~/build/jank/<version>, or in the work directory
    given as the second argument; that directory must not exist yet. The packaging
    comes from the committed HEAD (uncommitted changes are not built), the build image
    is made without cache each time, and a lintian error or warning that is not

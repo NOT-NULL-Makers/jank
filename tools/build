@@ -10,7 +10,7 @@
 #    image, rootless, without network, as the invoking user, with only the work directory
 #    mounted. lintian runs at the end; an error or warning that is not overridden fails
 #    the build. The packaging is taken from the committed HEAD of this repository.
-# Results end up in <work-dir> (default ~/build/jank-deb/<version>).
+# Results end up in <work-dir> (default ~/build/jank/<version>).
 set -euo pipefail
 
 readonly BASE_IMAGE="docker.io/library/debian:trixie"
@@ -29,7 +29,7 @@ repo="$(cd "$(dirname "$0")/.." && pwd)"
 version="$(git -C "$repo" show HEAD:debian/changelog | dpkg-parsechangelog -l- -S Version)"
 [[ "${version%-*}" == "$upstream_version" ]] || die "debian/changelog is at $version, tarball is $upstream_version"
 
-work="$(realpath -m "${2:-$HOME/build/jank-deb/$version}")"
+work="$(realpath -m "${2:-$HOME/build/jank/$version}")"
 [[ ! -e "$work" ]] || die "work directory exists, remove it first: $work"
 mkdir -p "$work"
 log="$work/build.log"
@@ -77,7 +77,7 @@ RUN apt-get update \\
       --tool 'apt-get -y --no-install-recommends -o Debug::pkgProblemResolver=yes' /tmp/control \\
  && rm -rf /var/lib/apt/lists/* /tmp/control /jank-build-deps_*
 EOF
-tag="localhost/jank-deb-build:$(sha256sum "$image_dir/control" | cut -c1-12)"
+tag="localhost/jank-build:$(sha256sum "$image_dir/control" | cut -c1-12)"
 echo "build: pulling $BASE_IMAGE"
 podman pull -q "$BASE_IMAGE" > /dev/null
 echo "build: base image digest $(podman image inspect --format '{{.Digest}}' "$BASE_IMAGE")"
